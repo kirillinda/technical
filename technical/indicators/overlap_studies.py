@@ -143,14 +143,12 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     elif MAtype == 4:
         df[mavalue] = ta.SMA(masrc, timeperiod=length)
     elif MAtype == 5:
-        df[mavalue] = VIDYA(df, length=length)
-    elif MAtype == 6:
         df[mavalue] = ta.TEMA(masrc, timeperiod=length)
-    elif MAtype == 7:
+    elif MAtype == 6:
         df[mavalue] = ta.WMA(df, timeperiod=length)
-    elif MAtype == 8:
+    elif MAtype == 7:
         df[mavalue] = vwma(df, length)
-    elif MAtype == 9:
+    elif MAtype == 8:
         df[mavalue] = zema(df, period=length)
     # Compute basic upper and lower bands
     df['basic_ub'] = df[mavalue] + (multiplier * df[atr])
