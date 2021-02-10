@@ -183,4 +183,4 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
 
     df.fillna(0, inplace=True)
 
-    return df
+    return df[pmx]
