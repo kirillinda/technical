@@ -112,6 +112,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     """
     import numpy as np
     import talib.abstract as ta
+    from technical.indicators import VIDYA
     df = dataframe.copy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
     atr = 'ATR_' + str(period)
