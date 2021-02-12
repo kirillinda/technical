@@ -112,6 +112,8 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
+    atr = np.array([])
+    mavalue = np.array([])
     atr = ta.ATR(high, low, close, timeperiod=period)
     pm = pkey
     # MAtype==1 --> EMA
