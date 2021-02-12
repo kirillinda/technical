@@ -126,7 +126,6 @@ def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
     # MAtype==7 --> WMA
     # MAtype==8 --> VWMA
     # MAtype==9 --> zema
-    masrc = (df["high"] + df["low"]) / 2
     if MAtype == 1:
         df[mavalue] = ta.EMA(masrc, timeperiod=length)
     elif MAtype == 2:
