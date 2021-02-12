@@ -6,13 +6,14 @@ from numpy.core.records import ndarray
 from pandas import DataFrame, Series
 
 
-
 ########################################
 #
 # Overlap Studies Functions
 #
 
 # BBANDS               Bollinger Bands
+
+
 def bollinger_bands(dataframe: DataFrame, period: int = 21, stdv: int = 2,
                     field: str = 'close', colum_prefix: str = "bb") -> DataFrame:
     """
@@ -105,7 +106,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
         MAtype: type of the moving average
 
     Returns :
-        df : Pandas DataFrame with new columns added for 
+        df : Pandas DataFrame with new columns added for
             True Range (TR), ATR (ATR_$period)
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
@@ -158,10 +159,10 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     for i in range(period, len(df)):
         df['final_ub'].iat[i] = df['basic_ub'].iat[i] if df['basic_ub'].iat[i] < df['final_ub'].iat[i - 1] or \
                                                          df[mavalue].iat[i - 1] > df['final_ub'].iat[i - 1] else \
-        df['final_ub'].iat[i - 1]
+            df['final_ub'].iat[i - 1]
         df['final_lb'].iat[i] = df['basic_lb'].iat[i] if df['basic_lb'].iat[i] > df['final_lb'].iat[i - 1] or \
                                                          df[mavalue].iat[i - 1] < df['final_lb'].iat[i - 1] else \
-        df['final_lb'].iat[i - 1]
+            df['final_lb'].iat[i - 1]
 
     # Set the Pmax value
     df[pm] = 0.00
@@ -182,3 +183,8 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     df.fillna(0, inplace=True)
 
     return df
+
+
+def thr(default, length, MAtype, multiplier, src_val, data_dict, pkey):
+    data_dict[pkey] = PMAX(default, period=length, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val)[
+        pkey]
