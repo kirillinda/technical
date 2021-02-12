@@ -92,7 +92,7 @@ def zema(dataframe, period, field='close'):
     dataframe['zema'] = dataframe['ema1'] + dataframe['d']
     return dataframe['zema']
 
-def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
+def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
     """
     Function to compute PMAX
 
@@ -115,8 +115,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
     atr = 'ATR_' + str(period)
     df[atr] = ta.ATR(df, timeperiod=period)
-    pm = 'pm_' + str(period) + '_' + str(multiplier) + '_' + str(length) + '_' + str(MAtype)
-    pmx = 'pmX_' + str(period) + '_' + str(multiplier) + '_' + str(length) + '_' + str(MAtype)
+    pm = pkey
     # MAtype==1 --> EMA
     # MAtype==2 --> DEMA
     # MAtype==3 --> T3
@@ -173,8 +172,6 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
                                          df['final_lb'].iat[i] else \
                     df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] < \
                                              df['final_lb'].iat[i] else 0.00
-        # Mark the trend direction up/down
-    df[pmx] = np.where((df[pm] > 0.00), np.where((df[mavalue] < df[pm]), 'down', 'up'), np.NaN)
     # Remove basic and final bands from the columns
     df.drop(['basic_ub', 'basic_lb', 'final_ub', 'final_lb'], inplace=True, axis=1)
 
@@ -183,5 +180,5 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     return df
 
 def DATATABLE(default, period, MAtype, multiplier, length, src_val, data_dict, pkey):
-    data_dict[pkey] = PMAX(default, period=period, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val)[
+    data_dict[pkey] = PMAX(default, period=period, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val, pkey)[
         pkey]
