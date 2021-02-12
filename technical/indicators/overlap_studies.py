@@ -138,10 +138,6 @@ def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
         df[mavalue] = ta.TEMA(masrc, timeperiod=length)
     elif MAtype == 6:
         df[mavalue] = ta.WMA(close, timeperiod=length)
-    elif MAtype == 7:
-        df[mavalue] = vwma(df, length)
-    elif MAtype == 8:
-        df[mavalue] = zema(df, period=length)
     # Compute basic upper and lower bands
     df['basic_ub'] = df[mavalue] + (multiplier * df[atr])
     df['basic_lb'] = df[mavalue] - (multiplier * df[atr])
