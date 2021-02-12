@@ -94,7 +94,7 @@ def zema(dataframe, period, field='close'):
     return dataframe['zema']
 
 @jit
-def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
+def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
     """
     Function to compute PMAX
 
@@ -111,7 +111,8 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    df = dataframe.copy().to_numpy()
+    df = dataframe.copy()
+    close=df['close'].to_numpy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
     atr = 'ATR_' + str(period)
     df[atr] = ta.ATR(df, timeperiod=period)
@@ -137,7 +138,7 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
     elif MAtype == 5:
         df[mavalue] = ta.TEMA(masrc, timeperiod=length)
     elif MAtype == 6:
-        df[mavalue] = ta.WMA(df, timeperiod=length)
+        df[mavalue] = ta.WMA(close, timeperiod=length)
     elif MAtype == 7:
         df[mavalue] = vwma(df, length)
     elif MAtype == 8:
@@ -173,7 +174,7 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
     return df
 
 
-def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict):
+def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict, masrc):
     data_dict[pkey] = \
-        PMAX(default, pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
+        PMAX(default, pkey, masrc, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
             pkey]
