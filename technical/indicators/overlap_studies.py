@@ -175,5 +175,5 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
 
 def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict):
     data_dict[pkey] = \
-        PMAX(default, pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
+        PMAX(default.to_numpy(), pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
             pkey]
