@@ -95,7 +95,7 @@ def zema(dataframe, period, field='close'):
     return dataframe['zema']
 
 @jit(nopython=True)
-def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
+def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtype=1):
     """
     Function to compute PMAX
 
@@ -161,13 +161,13 @@ def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
                 final_lb[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] >= \
                                          final_lb[i] else \
                     final_ub[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] < \
-                                             final_lb'[i] else 0.00
+                                             final_lb[i] else 0.00
 
 #    df.fillna(0, inplace=True)
 
     return pm
 
 
-def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict, masrc, high, low, close):
+def DATATABLE(pkey, period, MAtype, multiplier, length, data_dict, masrc, high, low, close):
     data_dict[pkey] = \
-        PMAX(default, pkey, masrc,high, low, close, period=period, multiplier=multiplier, length=length, MAtype=MAtype)
+        PMAX(pkey, masrc,high, low, close, period=period, multiplier=multiplier, length=length, MAtype=MAtype)
