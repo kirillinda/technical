@@ -2,6 +2,7 @@
 Overlap studies
 """
 from numba import jit
+import numpy as np
 from numpy.core.records import ndarray
 from pandas import DataFrame, Series
 import talib.abstract as ta
@@ -111,11 +112,9 @@ def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    df = dataframe.copy()
-    close=df['close'].to_numpy()
+#    df = dataframe.copy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
-    atr = 'ATR_' + str(period)
-    df[atr] = ta.ATR(df, timeperiod=period)
+    atr = ta.ATR(high, low, close, timeperiod=period)
     pm = pkey
     # MAtype==1 --> EMA
     # MAtype==2 --> DEMA
@@ -127,49 +126,48 @@ def PMAX(dataframe, pkey, masrc, period=10, multiplier=3, length=12, MAtype=1):
     # MAtype==8 --> VWMA
     # MAtype==9 --> zema
     if MAtype == 1:
-        df[mavalue] = ta.EMA(masrc, timeperiod=length)
+        mavalue = ta.EMA(masrc, timeperiod=length)
     elif MAtype == 2:
-        df[mavalue] = ta.DEMA(masrc, timeperiod=length)
+        mavalue = ta.DEMA(masrc, timeperiod=length)
     elif MAtype == 3:
-        df[mavalue] = ta.T3(masrc, timeperiod=length)
+        mavalue = ta.T3(masrc, timeperiod=length)
     elif MAtype == 4:
-        df[mavalue] = ta.SMA(masrc, timeperiod=length)
+        mavalue = ta.SMA(masrc, timeperiod=length)
     elif MAtype == 5:
-        df[mavalue] = ta.TEMA(masrc, timeperiod=length)
+        mavalue = ta.TEMA(masrc, timeperiod=length)
     elif MAtype == 6:
-        df[mavalue] = ta.WMA(close, timeperiod=length)
+        mavalue = ta.WMA(close, timeperiod=length)
     # Compute basic upper and lower bands
-    df['basic_ub'] = df[mavalue] + (multiplier * df[atr])
-    df['basic_lb'] = df[mavalue] - (multiplier * df[atr])
+    basic_ub = mavalue + (multiplier * atr)
+    basic_lb = mavalue - (multiplier * atr)
     # Compute final upper and lower bands
-    df['final_ub'] = 0.00
-    df['final_lb'] = 0.00
-    for i in range(period, len(df)):
-        df['final_ub'].iat[i] = df['basic_ub'].iat[i] if df['basic_ub'].iat[i] < df['final_ub'].iat[i - 1] or \
-                                                         df[mavalue].iat[i - 1] > df['final_ub'].iat[i - 1] else \
-            df['final_ub'].iat[i - 1]
-        df['final_lb'].iat[i] = df['basic_lb'].iat[i] if df['basic_lb'].iat[i] > df['final_lb'].iat[i - 1] or \
-                                                         df[mavalue].iat[i - 1] < df['final_lb'].iat[i - 1] else \
-            df['final_lb'].iat[i - 1]
+    final_ub = np.array()
+    final_lb = np.array()
+    for i in range(period, len(close)):
+        final_ub[i] = basic_ub[i] if basic_ub[i] < dfinal_ub[i - 1] or \
+                                                         mavalue[i - 1] > final_ub[i - 1] else \
+            final_ub[i - 1]
+        final_lb[i] = basic_lb[i] if basic_lb[i] > final_lb[i - 1] or \
+                                                         mavalue[i - 1] < dfinal_lb[i - 1] else \
+            final_lb[i - 1]
 
     # Set the Pmax value
-    df[pm] = 0.00
-    for i in range(period, len(df)):
-        df[pm].iat[i] = df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_ub'].iat[i - 1] and df[mavalue].iat[
-            i] <= df['final_ub'].iat[i] else \
-            df['final_lb'].iat[i] if df[pm].iat[i - 1] == df['final_ub'].iat[i - 1] and df[mavalue].iat[i] > \
-                                     df['final_ub'].iat[i] else \
-                df['final_lb'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] >= \
-                                         df['final_lb'].iat[i] else \
-                    df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] < \
-                                             df['final_lb'].iat[i] else 0.00
+    pm = np.array()
+    for i in range(period, len(close)):
+        pm[i] = final_ub[i] if pm[i - 1] == final_ub[i - 1] and mavalue[
+            i] <= final_ub[i] else \
+            final_lb[i] if pm[i - 1] == final_ub[i - 1] and mavalue[i] > \
+                                     final_ub[i] else \
+                final_lb[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] >= \
+                                         final_lb[i] else \
+                    final_ub[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] < \
+                                             final_lb'[i] else 0.00
 
-    df.fillna(0, inplace=True)
+#    df.fillna(0, inplace=True)
 
-    return df
+    return pm
 
 
-def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict, masrc):
+def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict, masrc, high, low, close):
     data_dict[pkey] = \
-        PMAX(default, pkey, masrc, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
-            pkey]
+        PMAX(default, pkey, masrc,high, low, close, period=period, multiplier=multiplier, length=length, MAtype=MAtype)
