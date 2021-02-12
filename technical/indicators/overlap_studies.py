@@ -1,7 +1,7 @@
 """
 Overlap studies
 """
-
+from numba import jit
 from numpy.core.records import ndarray
 from pandas import DataFrame, Series
 
@@ -93,7 +93,7 @@ def zema(dataframe, period, field='close'):
     dataframe['zema'] = dataframe['ema1'] + dataframe['d']
     return dataframe['zema']
 
-
+@jit
 def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     """
     Function to compute PMAX
@@ -184,7 +184,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
 
     return df
 
-
+@jit
 def DATATABLE(default, period, MAtype, multiplier, length, src_val, data_dict, pkey):
     data_dict[pkey] = PMAX(default, period=period, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val)[
         pkey]
