@@ -112,8 +112,8 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    atr = np.ndarray((1,),dtype=float64)
-    mavalue = np.ndarray((1,),dtype=float64)
+    atr = np.ndarray((1,),dtype=np.float64)
+    mavalue = np.ndarray((1,),dtype=np.float64)
     atr = ta.ATR(high, low, close, timeperiod=period)
     pm = pkey
     # MAtype==1 --> EMA
@@ -141,8 +141,8 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
     basic_ub = mavalue + (multiplier * atr)
     basic_lb = mavalue - (multiplier * atr)
     # Compute final upper and lower bands
-    final_ub = np.ndarray((1,),dtype=float64)
-    final_lb = np.ndarray((1,),dtype=float64)
+    final_ub = np.ndarray((1,),dtype=np.float64)
+    final_lb = np.ndarray((1,),dtype=np.float64)
     for i in range(period, len(close)):
         final_ub[i] = basic_ub[i] if basic_ub[i] < final_ub[i - 1] or \
                                                          mavalue[i - 1] > final_ub[i - 1] else \
@@ -152,7 +152,7 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
             final_lb[i - 1]
 
     # Set the Pmax value
-    pm = np.ndarray((1,),dtype=float64)
+    pm = np.ndarray((1,),dtype=np.float64)
     for i in range(period, len(close)):
         pm[i] = final_ub[i] if pm[i - 1] == final_ub[i - 1] and mavalue[
             i] <= final_ub[i] else \
