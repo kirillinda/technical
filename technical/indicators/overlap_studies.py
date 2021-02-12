@@ -4,7 +4,7 @@ Overlap studies
 from numba import jit
 from numpy.core.records import ndarray
 from pandas import DataFrame, Series
-
+import talib.abstract as ta
 
 ########################################
 #
@@ -111,7 +111,6 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    import talib.abstract as ta
     df = dataframe.copy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
     atr = 'ATR_' + str(period)
