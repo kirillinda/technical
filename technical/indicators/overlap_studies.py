@@ -167,8 +167,6 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
                                          df['final_lb'].iat[i] else \
                     df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] < \
                                              df['final_lb'].iat[i] else 0.00
-    # Remove basic and final bands from the columns
-    df.drop(['basic_ub', 'basic_lb', 'final_ub', 'final_lb'], inplace=True, axis=1)
 
     df.fillna(0, inplace=True)
 
