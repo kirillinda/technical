@@ -185,6 +185,6 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     return df
 
 
-def DATATABLE(default, length, MAtype, multiplier, src_val, data_dict, pkey):
+def DATATABLE(default, period, MAtype, multiplier, length, src_val, data_dict, pkey):
     data_dict[pkey] = PMAX(default, period=length, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val)[
         pkey]
