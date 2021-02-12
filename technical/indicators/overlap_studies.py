@@ -109,7 +109,6 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    import numpy as np
     import talib.abstract as ta
     df = dataframe.copy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
@@ -129,7 +128,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
         masrc = df["close"]
     elif src == 2:
         masrc = (df["high"] + df["low"]) / 2
-    elif src == 3:
+    elif src == 3:np
         masrc = (df["high"] + df["low"] + df["close"] + df["open"]) / 4
     if MAtype == 1:
         df[mavalue] = ta.EMA(masrc, timeperiod=length)
