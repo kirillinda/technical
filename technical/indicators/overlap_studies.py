@@ -111,7 +111,7 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    df = dataframe.copy()
+    df = dataframe.copy().to_numpy()
     mavalue = 'MA_' + str(MAtype) + '_' + str(length)
     atr = 'ATR_' + str(period)
     df[atr] = ta.ATR(df, timeperiod=period)
@@ -175,5 +175,5 @@ def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1):
 
 def DATATABLE(default, pkey, period, MAtype, multiplier, length, data_dict):
     data_dict[pkey] = \
-        PMAX(default.to_numpy(), pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
+        PMAX(default, pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype)[
             pkey]
