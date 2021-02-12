@@ -144,11 +144,11 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
     final_ub = np.array([])
     final_lb = np.array([])
     for i in range(period, len(close)):
-        final_ub[i] = basic_ub[i] if basic_ub[i] < dfinal_ub[i - 1] or \
+        final_ub[i] = basic_ub[i] if basic_ub[i] < final_ub[i - 1] or \
                                                          mavalue[i - 1] > final_ub[i - 1] else \
             final_ub[i - 1]
         final_lb[i] = basic_lb[i] if basic_lb[i] > final_lb[i - 1] or \
-                                                         mavalue[i - 1] < dfinal_lb[i - 1] else \
+                                                         mavalue[i - 1] < final_lb[i - 1] else \
             final_lb[i - 1]
 
     # Set the Pmax value
