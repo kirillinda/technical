@@ -92,7 +92,8 @@ def zema(dataframe, period, field='close'):
     dataframe['zema'] = dataframe['ema1'] + dataframe['d']
     return dataframe['zema']
 
-def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
+
+def PMAX(dataframe, pkey, period=10, multiplier=3, length=12, MAtype=1, src=1):
     """
     Function to compute PMAX
 
@@ -128,7 +129,7 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
         masrc = df["close"]
     elif src == 2:
         masrc = (df["high"] + df["low"]) / 2
-    elif src == 3:np
+    elif src == 3:
         masrc = (df["high"] + df["low"] + df["close"] + df["open"]) / 4
     if MAtype == 1:
         df[mavalue] = ta.EMA(masrc, timeperiod=length)
@@ -178,6 +179,8 @@ def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1, pkey):
 
     return df
 
-def DATATABLE(default, period, MAtype, multiplier, length, src_val, data_dict, pkey):
-    data_dict[pkey] = PMAX(default, period=period, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val, pkey)[
+
+def DATATABLE(default, pkey, period, MAtype, multiplier, length, src_val, data_dict):
+    data_dict[pkey] = \
+    PMAX(default, pkey, period=period, multiplier=multiplier, length=length, MAtype=MAtype, src=src_val)[
         pkey]
