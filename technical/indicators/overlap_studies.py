@@ -1,11 +1,11 @@
 """
 Overlap studies
 """
-from numba import jit
-import numpy as np
+
 from numpy.core.records import ndarray
 from pandas import DataFrame, Series
-import talib.abstract as ta
+
+
 
 ########################################
 #
@@ -13,8 +13,6 @@ import talib.abstract as ta
 #
 
 # BBANDS               Bollinger Bands
-
-
 def bollinger_bands(dataframe: DataFrame, period: int = 21, stdv: int = 2,
                     field: str = 'close', colum_prefix: str = "bb") -> DataFrame:
     """
@@ -94,25 +92,30 @@ def zema(dataframe, period, field='close'):
     dataframe['zema'] = dataframe['ema1'] + dataframe['d']
     return dataframe['zema']
 
-def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtype=1):
+
+def PMAX(dataframe, period=10, multiplier=3, length=12, MAtype=1, src=1):
     """
     Function to compute PMAX
-
     Args :
         df : Pandas DataFrame which contains ['date', 'open', 'high', 'low', 'close', 'volume'] columns
         period : Integer indicates the period of computation in terms of number of candles
         multiplier : Integer indicates value to multiply the ATR
         length: moving averages length
         MAtype: type of the moving average
-
     Returns :
-        df : Pandas DataFrame with new columns added for
+        df : Pandas DataFrame with new columns added for 
             True Range (TR), ATR (ATR_$period)
             PMAX (pm_$period_$multiplier_$length_$Matypeint)
             PMAX Direction (pmX_$period_$multiplier_$length_$Matypeint)
     """
-    atr = ta.ATR(high, low, close, timeperiod=period)
-    pm = pkey
+    import numpy as np
+    import talib.abstract as ta
+    df = dataframe.copy()
+    mavalue = 'MA_' + str(MAtype) + '_' + str(length)
+    atr = 'ATR_' + str(period)
+    df[atr] = ta.ATR(df, timeperiod=period)
+    pm = 'pm_' + str(period) + '_' + str(multiplier) + '_' + str(length) + '_' + str(MAtype)
+    pmx = 'pmX_' + str(period) + '_' + str(multiplier) + '_' + str(length) + '_' + str(MAtype)
     # MAtype==1 --> EMA
     # MAtype==2 --> DEMA
     # MAtype==3 --> T3
@@ -122,49 +125,60 @@ def PMAX(pkey, masrc,high, low, close, period=10, multiplier=3, length=12, MAtyp
     # MAtype==7 --> WMA
     # MAtype==8 --> VWMA
     # MAtype==9 --> zema
+    if src == 1:
+        masrc = df["close"]
+    elif src == 2:
+        masrc = (df["high"] + df["low"]) / 2
+    elif src == 3:
+        masrc = (df["high"] + df["low"] + df["close"] + df["open"]) / 4
     if MAtype == 1:
-        mavalue = ta.EMA(masrc, timeperiod=length)
+        df[mavalue] = ta.EMA(masrc, timeperiod=length)
     elif MAtype == 2:
-        mavalue = ta.DEMA(masrc, timeperiod=length)
+        df[mavalue] = ta.DEMA(masrc, timeperiod=length)
     elif MAtype == 3:
-        mavalue = ta.T3(masrc, timeperiod=length)
+        df[mavalue] = ta.T3(masrc, timeperiod=length)
     elif MAtype == 4:
-        mavalue = ta.SMA(masrc, timeperiod=length)
+        df[mavalue] = ta.SMA(masrc, timeperiod=length)
     elif MAtype == 5:
-        mavalue = ta.TEMA(masrc, timeperiod=length)
+        df[mavalue] = VIDYA(df, length=length)
     elif MAtype == 6:
-        mavalue = ta.WMA(close, timeperiod=length)
+        df[mavalue] = ta.TEMA(masrc, timeperiod=length)
+    elif MAtype == 7:
+        df[mavalue] = ta.WMA(df, timeperiod=length)
+    elif MAtype == 8:
+        df[mavalue] = vwma(df, length)
+    elif MAtype == 9:
+        df[mavalue] = zema(df, period=length)
     # Compute basic upper and lower bands
-    basic_ub = mavalue + (multiplier * atr)
-    basic_lb = mavalue - (multiplier * atr)
+    df['basic_ub'] = df[mavalue] + (multiplier * df[atr])
+    df['basic_lb'] = df[mavalue] - (multiplier * df[atr])
     # Compute final upper and lower bands
-    final_ub = np.array([])
-    final_lb = np.array([])
-    for i in range(period, len(close)):
-        final_ub[i] = basic_ub[i] if basic_ub[i] < final_ub[i - 1] or \
-                                                         mavalue[i - 1] > final_ub[i - 1] else \
-            final_ub[i - 1]
-        final_lb[i] = basic_lb[i] if basic_lb[i] > final_lb[i - 1] or \
-                                                         mavalue[i - 1] < final_lb[i - 1] else \
-            final_lb[i - 1]
+    df['final_ub'] = 0.00
+    df['final_lb'] = 0.00
+    for i in range(period, len(df)):
+        df['final_ub'].iat[i] = df['basic_ub'].iat[i] if df['basic_ub'].iat[i] < df['final_ub'].iat[i - 1] or \
+                                                         df[mavalue].iat[i - 1] > df['final_ub'].iat[i - 1] else \
+        df['final_ub'].iat[i - 1]
+        df['final_lb'].iat[i] = df['basic_lb'].iat[i] if df['basic_lb'].iat[i] > df['final_lb'].iat[i - 1] or \
+                                                         df[mavalue].iat[i - 1] < df['final_lb'].iat[i - 1] else \
+        df['final_lb'].iat[i - 1]
 
     # Set the Pmax value
-    pm = np.array([])
-    for i in range(period, len(close)):
-        pm[i] = final_ub[i] if pm[i - 1] == final_ub[i - 1] and mavalue[
-            i] <= final_ub[i] else \
-            final_lb[i] if pm[i - 1] == final_ub[i - 1] and mavalue[i] > \
-                                     final_ub[i] else \
-                final_lb[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] >= \
-                                         final_lb[i] else \
-                    final_ub[i] if pm[i - 1] == final_lb[i - 1] and mavalue[i] < \
-                                             final_lb[i] else 0.00
+    df[pm] = 0.00
+    for i in range(period, len(df)):
+        df[pm].iat[i] = df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_ub'].iat[i - 1] and df[mavalue].iat[
+            i] <= df['final_ub'].iat[i] else \
+            df['final_lb'].iat[i] if df[pm].iat[i - 1] == df['final_ub'].iat[i - 1] and df[mavalue].iat[i] > \
+                                     df['final_ub'].iat[i] else \
+                df['final_lb'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] >= \
+                                         df['final_lb'].iat[i] else \
+                    df['final_ub'].iat[i] if df[pm].iat[i - 1] == df['final_lb'].iat[i - 1] and df[mavalue].iat[i] < \
+                                             df['final_lb'].iat[i] else 0.00
+        # Mark the trend direction up/down
+    df[pmx] = np.where((df[pm] > 0.00), np.where((df[mavalue] < df[pm]), 'down', 'up'), np.NaN)
+    # Remove basic and final bands from the columns
+    df.drop(['basic_ub', 'basic_lb', 'final_ub', 'final_lb'], inplace=True, axis=1)
 
-#    df.fillna(0, inplace=True)
+    df.fillna(0, inplace=True)
 
-    return pm
-
-
-def DATATABLE(pkey, period, MAtype, multiplier, length, data_dict, masrc, high, low, close):
-    data_dict[pkey] = \
-        PMAX(pkey, masrc,high, low, close, period=period, multiplier=multiplier, length=length, MAtype=MAtype)
+    return df
